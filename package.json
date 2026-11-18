@@ -1,0 +1,1 @@
+{"name":"rune-midgarts-island","private":true,"type":"module","scripts":{"preview":"node preview.mjs","check":"node --check dist/app.js && node --check dist/cities.js && node --check dist/characters.js && node --check dist/adventure.js && node --check dist/prontera.js && node --check dist/navigation.js && node --check preview.mjs && node check-city.mjs"}}

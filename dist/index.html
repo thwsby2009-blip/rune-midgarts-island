@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101e29"><meta name="description" content="仙境傳說島：探索盧恩米德加茲與各地城市的互動世界地圖。">
+<title>仙境傳說島｜世界巡遊</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="adventure.css"><link rel="stylesheet" href="city.css">
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+</head>
+<body>
+<aside id="sidebar">
+  <header><div class="eyebrow">RUNE–MIDGARTS · WORLD ATLAS</div><h1>仙境傳說島<span>世界巡遊</span></h1><p>每一座城市，都是冒險的起點。</p></header>
+  <div class="search"><span aria-hidden="true">⌕</span><input id="search" placeholder="尋找城市、中英文名稱…" aria-label="搜尋城市"><kbd>/</kbd></div>
+  <div id="filters" aria-label="地區篩選"></div>
+  <div class="list-heading"><span id="count"></span><span>城市索引</span></div>
+  <nav id="city-list" aria-label="城市列表"></nav>
+  <section id="city-guide" hidden><div class="eyebrow">THE CAPITAL OF RUNE–MIDGARTS</div><h2>普隆德拉</h2><p class="city-subtitle">石板路、紅屋頂，與冒險的起點。</p><div class="guide-rule"><span>城內地標</span><span>06 PLACES</span></div><nav id="city-landmarks" aria-label="普隆德拉城內地標"></nav><button id="landmark-walk" hidden>步行前往 →</button><button id="city-reference">查看原始配置圖 ⤢</button><p class="city-design-note">依提供的配置圖重建主要街道與地標，建築細節採風格化設計。</p></section>
+  <footer><span class="status-dot"></span> 城市與角色探索版 <button id="notes-open">版本說明 ↗</button></footer>
+</aside>
+<main id="stage">
+  <div id="viewport"><img id="fallback-map" src="assets/world-map.png" alt="使用者提供的 RO 仙境島世界地圖"><canvas id="world" aria-label="可旋轉與縮放的城市世界地圖"></canvas><div id="markers"></div></div>
+  <div class="topbar"><button id="menu" aria-label="展開城市索引" aria-expanded="false">☰ 城市索引</button><div class="breadcrumb">世界地圖 <span>/</span> <strong id="region-title">全境探索</strong></div><button id="city-entry" disabled>進入普隆德拉 3D →</button></div>
+  <div class="map-title"><span>THE ADVENTURE BEGINS</span><h2>你的下一站，在哪裡？</h2><p>選擇城鎮，展開一段新的旅程。</p></div>
+  <section id="player-hud" aria-label="目前操控的人物" hidden><img id="player-portrait" alt="" width="52" height="64"><div><div class="eyebrow">YOUR ADVENTURER</div><strong id="player-name"></strong><span id="player-status" role="status">準備出發</span></div><div class="player-actions"><button id="choose-job">更換職業</button><button id="follow-player" aria-pressed="true">跟隨人物</button><button id="stop-player">停下</button></div></section>
+  <div id="player-label" hidden></div>
+  <div class="adventure-entry"><button id="enter-adventure" disabled>選擇冒險者 ↗</button><span id="adventure-status">人物準備中…</span></div>
+  <div class="map-controls" aria-label="地圖操作"><button id="zoom-in" aria-label="放大">＋</button><button id="zoom-out" aria-label="縮小">−</button><i></i><button id="home" title="回到全景">⌂</button><button id="view" aria-pressed="true">3D</button><button id="labels" aria-pressed="true" title="切換城市標籤">名</button></div>
+  <div id="loading">正在展開世界地圖…</div>
+  <section id="city-card" aria-live="polite" hidden></section>
+  <button id="landmark-walk-mobile" hidden>步行前往 →</button>
+  <div id="walk-pad" aria-label="人物行走方向" hidden><button data-walk="w" aria-label="人物向前走">↑</button><button data-walk="a" aria-label="人物向左走">←</button><button data-walk="s" aria-label="人物向後走">↓</button><button data-walk="d" aria-label="人物向右走">→</button><span>按住方向行走</span></div>
+  <div class="map-bottom"><span><b class="status-dot"></b> <span id="map-caption">城市位置為設計草案，待逐一確認</span></span><span id="gesture">拖曳旋轉 · 滾輪縮放 · 右鍵平移</span></div>
+  <div class="compass" aria-hidden="true"><span>N</span>✧</div>
+</main>
+<dialog id="job-dialog" aria-labelledby="job-title"><div class="job-heading"><div class="eyebrow">CHOOSE YOUR FIRST ADVENTURER</div><h2 id="job-title">今天，你想成為誰？</h2><p>六個職業，六種風格。選一位冒險者，從普隆德拉出發。</p></div><div id="job-options" role="radiogroup" aria-label="選擇冒險職業"></div><div class="job-details"><p id="job-motto"></p><span id="job-description"></span></div><div class="job-bottom"><span>點選地圖移動<br>WASD / 方向鍵 / 螢幕方向鈕</span><button id="start-adventure">開始冒險 →</button></div></dialog>
+<dialog id="notes"><button id="notes-close" aria-label="關閉">×</button><div class="eyebrow">ABOUT THIS ATLAS</div><h2>先探索城市，再遇見魔物。</h2><p>本版加入六種可選擇的 Q 版職業人物。點地、WASD、方向鍵與螢幕方向鈕皆可移動，並可更換職業或跟隨人物。世界地圖為自由探索；普隆德拉城內已加入建築碰撞與繞路，尚未加入戰鬥或多人同步。</p><p>世界地圖使用你提供的精緻底圖與立體光標。普隆德拉另有可行走的 3D 城內，包含城門、噴水池、王宮、大教堂與商店街；其餘城市的城內場景尚待製作。</p><p>目前城市座標是配合這張概念底圖的初步配置，並非遊戲內的官方座標。外域與新區域先列入索引，位置確認後再放上地圖。</p><p>介紹依你提供的清單整理。「菲音斯」重複條目先合併，所屬及譯名保留待核對；「貓咪島／綿綿島」及「呼德姆／諾斯哈根」也保留待確認註記。</p><p>你提供的魔物與職業參考圖保留在專案 references 資料夾，不包含在網站壓縮包。本版不建立魔物資料。</p><small>地圖與人物參考：使用者提供素材。Q 版人物：原創程式模型。Three.js：MIT 授權。</small></dialog>
+<dialog id="interior-dialog" aria-labelledby="interior-title"><button id="interior-close" aria-label="關閉城內地圖">×</button><div class="eyebrow">PRONTERA · CITY ATLAS</div><h2 id="interior-title">普隆德拉｜原始配置參考</h2><p>這張註解圖是街道、廣場與設施位置的參考；另可進入 3D 城內，操控人物探索。</p><button id="reference-enter" class="focus-button">進入普隆德拉 3D →</button><div class="interior-image"><img src="assets/prontera-interior.jfif" alt="普隆德拉城內配置參考圖，含南北主幹道、中央廣場、大教堂與設施標註" width="560" height="570"></div><p class="interior-source">圖片由你提供 · <a href="https://wiki2.gamer.com.tw/wiki.php?n=4708:%E6%99%AE%E9%9A%86%E5%BE%B7%E6%8B%89" target="_blank" rel="noopener noreferrer">普隆德拉介紹（巴哈姆特）↗</a></p></dialog>
+<script type="module" src="app.js"></script>
+</body></html>

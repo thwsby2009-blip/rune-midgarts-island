@@ -2,14 +2,18 @@ import * as T from 'three';
 import {createNavigation} from './navigation.js';
 
 // A stylized reconstruction of the supplied annotated layout, not a game asset extraction.
+// 普隆德拉地基放大倍率（第 0 步：整城等比例放大約 2 倍）。
+// 縮放套在 group 上；合併幾何用 1× 世界矩陣烘焙，group.scale 必須放在合併之後，否則合併網格會被放大兩次。
+const S=2;
 export function createProntera(){
   const group=new T.Group(),labels=new T.Group(),obstacles=[],animated=[];group.add(labels);
+  const labelWorld=new T.Vector3();
   const materials=new Map();
   const material=(color)=>{if(!materials.has(color))materials.set(color,new T.MeshStandardMaterial({color,roughness:.88}));return materials.get(color);};
   function mesh(geometry,color,x,y,z,parent=group){const m=new T.Mesh(geometry,typeof color==='number'?material(color):color);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
   const box=(x,y,z,w,h,d,c,p)=>mesh(new T.BoxGeometry(w,h,d),c,x,y,z,p);
   const cylinder=(x,y,z,rt,rb,h,c,n=16,p)=>mesh(new T.CylinderGeometry(rt,rb,h,n),c,x,y,z,p);
-  function block(x,z,w,d){obstacles.push({minX:x-w/2,maxX:x+w/2,minZ:z-d/2,maxZ:z+d/2});}
+  function block(x,z,w,d){obstacles.push({minX:(x-w/2)*S,maxX:(x+w/2)*S,minZ:(z-d/2)*S,maxZ:(z+d/2)*S});}
   function tileTexture(){const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;const c=canvas.getContext('2d');c.fillStyle='#a39d8a';c.fillRect(0,0,256,256);for(let row=0;row<8;row++)for(let col=-1;col<6;col++){const v=178+((row*17+col*11+90)%31),x=col*51+(row%2)*25;c.fillStyle=`rgb(${v+9},${v+4},${v-9})`;c.fillRect(x+1,row*32+1,49,30);c.fillStyle='#ffffff16';c.fillRect(x+2,row*32+2,46,1);}const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.wrapS=texture.wrapT=T.RepeatWrapping;return texture;}
   const paving=tileTexture();
   function road(x,z,w,d){const tex=paving.clone();tex.needsUpdate=true;tex.repeat.set(w/5,d/5);const m=box(x,.035,z,w,.07,d,new T.MeshStandardMaterial({map:tex,color:0xf2eadb,roughness:1}));m.castShadow=false;return m;}
@@ -109,7 +113,8 @@ export function createProntera(){
     geometry.computeBoundingSphere();const merged=new T.Mesh(geometry,objects[0].material);merged.castShadow=objects[0].castShadow;merged.receiveShadow=objects[0].receiveShadow;group.add(merged);
     for(const o of objects){o.removeFromParent();o.geometry.dispose();}for(const p of parts)p.dispose();
   }
-  const navigation=createNavigation({obstacles});
+  group.scale.setScalar(S);
+  const navigation=createNavigation({minX:-94,maxX:94,minZ:-114,maxZ:114,step:2.8,obstacles});
   const landmarks=[
     {id:'fountain',name:'中央噴水池',desc:'中央廣場與城市交會點',look:{x:0,z:0},walk:{x:0,z:9}},
     {id:'palace',name:'王宮大道',desc:'沿主幹道向北，前往王宮',look:{x:0,z:-45},walk:{x:0,z:-35}},
@@ -118,5 +123,5 @@ export function createProntera(){
     {id:'garden',name:'城西花園',desc:'樹蔭、長椅與西側街區',look:{x:-36,z:0},walk:{x:-35,z:0}},
     {id:'south-gate',name:'南門',desc:'從城門出發，探索普隆德拉',look:{x:0,z:55},walk:{x:0,z:51}}
   ];
-  return {group,ground,labels,navigation,landmarks,spawn:{x:0,y:.15,z:47},update(time,camera){finial.rotation.y=time*.00025;if(camera)for(const label of labels.children)label.visible=camera.position.distanceTo(label.position)>23;}};
+  return {group,ground,labels,navigation,landmarks:landmarks.map(l=>({...l,look:{x:l.look.x*S,z:l.look.z*S},walk:{x:l.walk.x*S,z:l.walk.z*S}})),spawn:{x:0,y:.15,z:47*S},update(time,camera){finial.rotation.y=time*.00025;if(camera)for(const label of labels.children){label.getWorldPosition(labelWorld);label.visible=camera.position.distanceTo(labelWorld)>23*S;}}};
 }

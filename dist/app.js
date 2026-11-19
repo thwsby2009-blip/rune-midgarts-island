@@ -51,7 +51,7 @@ function moveTo(target,position){
 function resetView(){
   if(!camera){updateMarkers();return;}
   const aspect=stage.clientWidth/stage.clientHeight;
-  if(mode==='city'){const d=Math.max(205,175/Math.max(.4,aspect)+30);moveTo(new THREE.Vector3(0,0,-3),new THREE.Vector3(flat?0:d*.34,flat?d:d*.78,flat?.01:d*.66));return;}
+  if(mode==='city'){const d=Math.max(410,350/Math.max(.4,aspect)+60);moveTo(new THREE.Vector3(0,0,-3),new THREE.Vector3(flat?0:d*.34,flat?d:d*.78,flat?.01:d*.66));return;}
   const distance=Math.max(178,192/Math.max(.4,aspect)+30);
   moveTo(new THREE.Vector3(0,0,0),new THREE.Vector3(0,flat?distance:distance*.87,flat?.01:distance*.53));
 }
@@ -72,7 +72,7 @@ async function initWorld(){
     const texture=await new THREE.TextureLoader().loadAsync('assets/world-map.png');texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=renderer.capabilities.getMaxAnisotropy();
     const map=new THREE.Mesh(new THREE.PlaneGeometry(138,113.27),new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide}));map.rotation.x=-Math.PI/2;worldRoot.add(map);worldGround=map;
     const base=new THREE.Mesh(new THREE.BoxGeometry(138.5,1.5,113.77),new THREE.MeshStandardMaterial({color:0x766343,roughness:.8}));base.position.y=-1.5;worldRoot.add(base);
-    scene.add(new THREE.HemisphereLight(0xdff4ff,0x667052,2));const light=new THREE.DirectionalLight(0xffe5af,2.6);light.position.set(-45,85,35);light.castShadow=true;light.shadow.mapSize.set(2048,2048);Object.assign(light.shadow.camera,{left:-85,right:85,top:85,bottom:-85,near:1,far:220});light.shadow.bias=-.0004;light.shadow.normalBias=.04;scene.add(light);renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    scene.add(new THREE.HemisphereLight(0xdff4ff,0x667052,2));const light=new THREE.DirectionalLight(0xffe5af,2.6);light.position.set(-45,85,35);light.castShadow=true;light.shadow.mapSize.set(2048,2048);Object.assign(light.shadow.camera,{left:-170,right:170,top:170,bottom:-170,near:1,far:440});light.shadow.bias=-.0004;light.shadow.normalBias=.04;scene.add(light);renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     for(const c of cities.filter(c=>c.pos)){
       const p=point(c),group=new THREE.Group();group.position.set(p.x,.1,p.z);
       const ring=new THREE.Mesh(new THREE.TorusGeometry(.95,.09,6,32),new THREE.MeshBasicMaterial({color:0xf1d294}));ring.rotation.x=Math.PI/2;ring.position.y=.1;group.add(ring);
@@ -100,10 +100,10 @@ async function enterProntera(){
   const entry=$('#city-entry');entry.disabled=true;entry.textContent='正在開啟城門…';
   try{
     if(!cityWorld){const {createProntera}=await import('./prontera.js');cityWorld=createProntera();scene.add(cityWorld.group);buildCityGuide();}
-    returnPosition=adventure.player?.position.clone()||new THREE.Vector3(18.492,.15,9.741);closeCard();mode='city';flat=false;$('#view').textContent='3D';$('#view').setAttribute('aria-pressed','true');controls.enableRotate=true;controls.minDistance=15;controls.maxDistance=360;
-    worldRoot.visible=false;cityWorld.group.visible=true;cityWorld.labels.visible=showLabels;renderer.shadowMap.enabled=true;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;scene.background=new THREE.Color(0xc9dcda);scene.fog=new THREE.Fog(0xc9dcda,330,700);
+    returnPosition=adventure.player?.position.clone()||new THREE.Vector3(18.492,.15,9.741);closeCard();mode='city';flat=false;$('#view').textContent='3D';$('#view').setAttribute('aria-pressed','true');controls.enableRotate=true;controls.minDistance=15;controls.maxDistance=720;
+    worldRoot.visible=false;cityWorld.group.visible=true;cityWorld.labels.visible=showLabels;renderer.shadowMap.enabled=true;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;scene.background=new THREE.Color(0xc9dcda);scene.fog=new THREE.Fog(0xc9dcda,660,1400);
     document.body.classList.add('city-mode');$('#menu').textContent='☰ 城內導覽';$('#menu').setAttribute('aria-label','展開城內導覽');$('#world').setAttribute('aria-label','普隆德拉立體城內場景');$('#region-title').textContent='普隆德拉・城內';$('#map-caption').textContent='依配置圖重建・風格化普隆德拉';$('#gesture').textContent='點選街道行走 · WASD / 方向鍵';$('#city-guide').hidden=false;
-    adventure.setEnvironment({map:cityWorld.ground,navigation:cityWorld.navigation,spawn:cityWorld.spawn,speed:6});adventure.setFollow(false);resetView();
+    adventure.setEnvironment({map:cityWorld.ground,navigation:cityWorld.navigation,spawn:cityWorld.spawn,speed:12});adventure.setFollow(false);resetView();
     $('#adventure-status').textContent='點選街道行走 · 建築會自動繞行';entry.textContent='← 返回世界地圖';entry.disabled=false;
     history.replaceState(null,'','#city=prontera&view=interior');if(!adventure.player)adventure.openChooser();
   }catch(error){console.error('Could not open Prontera.',error);entry.textContent='重新進入普隆德拉';entry.disabled=false;$('#adventure-status').textContent='城內暫時無法開啟，請再試一次';}finally{enteringCity=false;}
@@ -114,7 +114,7 @@ function leaveProntera(){
   adventure.setEnvironment({map:worldGround,spawn:returnPosition});adventure.setFollow(true);$('#adventure-status').textContent='點選地圖移動 · WASD / 方向鍵';chooseRegion(region);selectCity(cities.find(c=>c.id==='prontera'));
 }
 function buildCityGuide(){
-  const nav=$('#city-landmarks');for(const landmark of cityWorld.landmarks){const button=document.createElement('button');button.className='landmark-button';button.innerHTML=`<span>${landmark.name}<small>${landmark.desc}</small></span><b>↗</b>`;button.onclick=()=>{document.body.classList.remove('menu-open');$('#menu').setAttribute('aria-expanded','false');for(const b of nav.children)b.classList.toggle('active',b===button);adventure.keys.clear();adventure.target=null;adventure.waypoints=[];adventure.setFollow(false);const p=landmark.look;moveTo(new THREE.Vector3(p.x,0,p.z),new THREE.Vector3(p.x+20,33,p.z+35));for(const selector of ['#landmark-walk','#landmark-walk-mobile']){const walk=$(selector);walk.hidden=!adventure.player;walk.textContent=`步行前往${landmark.name} →`;walk.onclick=()=>{adventure.goTo(landmark.walk);adventure.focusPlayer();};}};nav.append(button);}
+  const nav=$('#city-landmarks');for(const landmark of cityWorld.landmarks){const button=document.createElement('button');button.className='landmark-button';button.innerHTML=`<span>${landmark.name}<small>${landmark.desc}</small></span><b>↗</b>`;button.onclick=()=>{document.body.classList.remove('menu-open');$('#menu').setAttribute('aria-expanded','false');for(const b of nav.children)b.classList.toggle('active',b===button);adventure.keys.clear();adventure.target=null;adventure.waypoints=[];adventure.setFollow(false);const p=landmark.look;moveTo(new THREE.Vector3(p.x,0,p.z),new THREE.Vector3(p.x+40,66,p.z+70));for(const selector of ['#landmark-walk','#landmark-walk-mobile']){const walk=$(selector);walk.hidden=!adventure.player;walk.textContent=`步行前往${landmark.name} →`;walk.onclick=()=>{adventure.goTo(landmark.walk);adventure.focusPlayer();};}};nav.append(button);}
 }
 $('#search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderList();});
 $('#home').onclick=()=>{if(mode==='city'){adventure.setFollow(false);resetView();return;}closeCard();chooseRegion('all');query='';$('#search').value='';renderList();resetView();};

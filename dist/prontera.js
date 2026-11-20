@@ -20,9 +20,11 @@ export function createProntera(){
   box(0,-1.4,0,105,2.4,132,0x8d9c6e);box(0,-2.9,0,109,1.0,136,0x647c6c);
   const ground=mesh(new T.PlaneGeometry(100,126),0xa7b87e,0,0,0);ground.rotation.x=-Math.PI/2;ground.castShadow=false;
   road(0,7,9,106);road(0,0,96,8);road(-25,0,5,113);road(25,0,5,113);road(0,-30,94,4.5);road(0,30,94,4.5);
-  const plaza=mesh(new T.CylinderGeometry(13,13,.10,56),0xd8d1b8,0,.10,0);plaza.castShadow=false;
-  const plazaRim=mesh(new T.TorusGeometry(12.3,.17,5,72),0x9d997f,0,.18,0);plazaRim.rotation.x=Math.PI/2;
-  for(let i=0;i<8;i++){const a=i*Math.PI/4;const strip=box(Math.cos(a)*8,.18,Math.sin(a)*8,.18,.035,8,0xb3aa91);strip.rotation.y=Math.PI/2-a;strip.castShadow=false;}
+  // ① 中央噴水池廣場（第 0 步重建第一件）：城市中心點——石板圓廣場＋同心圓環＋放射石帶。
+  const plaza=mesh(new T.CylinderGeometry(16,16,.10,64),0xd8d1b8,0,.10,0);plaza.castShadow=false;
+  const plazaRim=mesh(new T.TorusGeometry(15.4,.22,6,80),0xa8654f,0,.18,0);plazaRim.rotation.x=Math.PI/2;
+  const plazaRing=mesh(new T.TorusGeometry(11,.16,5,72),0xcfc7ae,0,.18,0);plazaRing.rotation.x=Math.PI/2;
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;const strip=box(Math.cos(a)*10.8,.18,Math.sin(a)*10.8,.20,.035,9.4,0xb3aa91);strip.rotation.y=Math.PI/2-a;strip.castShadow=false;}
 
   function roof(x,y,z,w,d,h,color,parent=group){const shape=new T.Shape();shape.moveTo(-w/2,0);shape.lineTo(w/2,0);shape.lineTo(0,h);shape.closePath();const g=new T.ExtrudeGeometry(shape,{depth:d,bevelEnabled:false,curveSegments:1});return mesh(g,color,x,y,z-d/2,parent);}
   function window(x,y,z,w=1,h=1.5,parent=group){box(x,y,z,w+.25,h+.22,.15,0xf2dfb3,parent);box(x,y,z+.09,w,h,.08,0x779a9a,parent);box(x,y,z+.15,.09,h,.03,0x665346,parent);box(x,y,z+.15,w,.09,.03,0x665346,parent);box(x,y-h/2-.12,z+.13,w+.42,.16,.33,0x8a7358,parent);}
@@ -42,15 +44,17 @@ export function createProntera(){
   // Buildings flank the axial streets; alleys remain open between the blocks.
   const houses=[[-13,17,9,9],[-37,17,10,9],[13,17,9,9],[37,17,10,9],[-13,-17,9,9],[-37,-17,10,9],[13,-17,9,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-37,-43,10,11],[-13,-42,8,9]];
   houses.forEach(([x,z,w,d],i)=>house(x,z,w,d,5.7+(i%3)*.65,[0xe0d2b2,0xdbc399,0xe6dcc3,0xcfc9ae][i%4],[0xa35649,0xa8654f,0x735c64][i%3]));
-  // Central fountain: raised basin, turquoise water, sculpted stem and arcing jets.
-  block(0,0,8.8,8.8);
-  cylinder(0,.35,0,4.6,4.8,.6,0xb2b3a3,40);cylinder(0,.72,0,4.1,4.1,.28,0x6f9b9e,40);
-  const rim=mesh(new T.TorusGeometry(4.3,.28,8,48),0xd2d0b8,0,.86,0);rim.rotation.x=Math.PI/2;
-  cylinder(0,1.48,0,.65,.85,1.5,0xcdcdb6);cylinder(0,2.5,0,2.1,.8,.7,0xc5c6b2,28);cylinder(0,2.88,0,1.9,1.9,.08,0x5eabb8,28);
-  cylinder(0,3.48,0,.35,.4,1.1,0xd5d4bb);const finial=mesh(new T.OctahedronGeometry(.5),0xdac487,0,4.18,0);animated.push({type:'finial',mesh:finial});
+  // 重建噴水池：加寬石砌水池、陶土色池緣、雙層水盤＋金色頂飾（舊噴水池已拆除）。
+  block(0,0,11.6,11.6);
+  cylinder(0,.35,0,5.6,5.8,.7,0xb2b3a3,48);cylinder(0,.72,0,5.0,5.0,.28,0x6f9b9e,48);
+  const rim=mesh(new T.TorusGeometry(5.35,.32,8,56),0xa8654f,0,.88,0);rim.rotation.x=Math.PI/2;
+  cylinder(0,1.5,0,.75,1.0,1.6,0xcdcdb6);cylinder(0,2.55,0,2.5,.9,.75,0xc5c6b2,32);cylinder(0,2.95,0,2.25,2.25,.08,0x5eabb8,32);
+  cylinder(0,3.6,0,.4,.45,1.2,0xd5d4bb);const finial=mesh(new T.OctahedronGeometry(.55),0xdac487,0,4.45,0);animated.push({type:'finial',mesh:finial});
   const waterMaterial=new T.MeshStandardMaterial({color:0x92d8e4,transparent:true,opacity:.7,roughness:.2});
-  for(let i=0;i<8;i++){const a=i*Math.PI/4;const curve=new T.QuadraticBezierCurve3(new T.Vector3(Math.cos(a)*.7,2.9,Math.sin(a)*.7),new T.Vector3(Math.cos(a)*2.4,4.4,Math.sin(a)*2.4),new T.Vector3(Math.cos(a)*3.3,.93,Math.sin(a)*3.3));mesh(new T.TubeGeometry(curve,18,.055,5,false),waterMaterial,0,0,0);}
-  sign('中央噴水池',0,6.2,0,9);
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;const curve=new T.QuadraticBezierCurve3(new T.Vector3(Math.cos(a)*.8,3.0,Math.sin(a)*.8),new T.Vector3(Math.cos(a)*2.9,4.7,Math.sin(a)*2.9),new T.Vector3(Math.cos(a)*4.1,.95,Math.sin(a)*4.1));mesh(new T.TubeGeometry(curve,18,.055,5,false),waterMaterial,0,0,0);}
+  sign('中央噴水池',0,7.0,0,9);
+  // 廣場四角石砌花壇（多層次綠意點綴）。
+  for(const [px,pz] of [[-11,-11],[11,-11],[-11,11],[11,11]]){box(px,.35,pz,2.2,.7,2.2,0xbaa37c);const shrub=mesh(new T.IcosahedronGeometry(.95,1),0x688b55,px,1.35,pz);shrub.scale.y=1.2;for(let i=0;i<3;i++){const f=mesh(new T.IcosahedronGeometry(.28,0),i%2?0xe8bd66:0xc48a9b,px-.6+i*.6,2.1,pz);f.castShadow=false;}}
 
   function tower(x,z,r=2.2,h=12,roofColor=0x596e80){
     cylinder(x,h/2,z,r,r+.2,h,0xd2cfb6,16);cylinder(x,h-.4,z,r+.3,r+.3,.7,0xbbbba6,16);

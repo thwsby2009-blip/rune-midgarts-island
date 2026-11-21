@@ -19,7 +19,7 @@ export function createProntera(){
   function road(x,z,w,d){const tex=paving.clone();tex.needsUpdate=true;tex.repeat.set(w/5,d/5);const m=box(x,.035,z,w,.07,d,new T.MeshStandardMaterial({map:tex,color:0xf2eadb,roughness:1}));m.castShadow=false;return m;}
   box(0,-1.4,0,105,2.4,132,0x8d9c6e);box(0,-2.9,0,109,1.0,136,0x647c6c);
   const ground=mesh(new T.PlaneGeometry(100,126),0xa7b87e,0,0,0);ground.rotation.x=-Math.PI/2;ground.castShadow=false;
-  road(0,7,9,106);road(0,0,96,8);road(-25,0,5,113);road(25,0,5,113);road(0,-30,94,4.5);road(0,30,94,4.5);
+  // 舊占位道路已拆除，道路改由下方「② 道路網」段落自廣場放射統一鋪設。
   // ① 中央噴水池廣場（第 0 步重建第一件）：城市中心點——石板圓廣場＋同心圓環＋放射石帶。
   const plaza=mesh(new T.CylinderGeometry(16,16,.10,64),0xd8d1b8,0,.10,0);plaza.castShadow=false;
   const plazaRim=mesh(new T.TorusGeometry(15.4,.22,6,80),0xa8654f,0,.18,0);plazaRim.rotation.x=Math.PI/2;
@@ -42,7 +42,8 @@ export function createProntera(){
     return g;
   }
   // Buildings flank the axial streets; alleys remain open between the blocks.
-  const houses=[[-13,17,9,9],[-37,17,10,9],[13,17,9,9],[37,17,10,9],[-13,-17,9,9],[-37,-17,10,9],[13,-17,9,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-37,-43,10,11],[-13,-42,8,9]];
+  // 廣場內圈四棟舊民房（±13,±17）已配合 ② 道路網的斜向大道拆除（做到哪拆哪）；原址機能建築待第 0 步④重建。
+  const houses=[[-37,17,10,9],[37,17,10,9],[-37,-17,10,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-37,-43,10,11],[-13,-42,8,9]];
   houses.forEach(([x,z,w,d],i)=>house(x,z,w,d,5.7+(i%3)*.65,[0xe0d2b2,0xdbc399,0xe6dcc3,0xcfc9ae][i%4],[0xa35649,0xa8654f,0x735c64][i%3]));
   // 重建噴水池：加寬石砌水池、陶土色池緣、雙層水盤＋金色頂飾（舊噴水池已拆除）。
   block(0,0,11.6,11.6);
@@ -55,6 +56,26 @@ export function createProntera(){
   sign('中央噴水池',0,7.0,0,9);
   // 廣場四角石砌花壇（多層次綠意點綴）。
   for(const [px,pz] of [[-11,-11],[11,-11],[-11,11],[11,11]]){box(px,.35,pz,2.2,.7,2.2,0xbaa37c);const shrub=mesh(new T.IcosahedronGeometry(.95,1),0x688b55,px,1.35,pz);shrub.scale.y=1.2;for(let i=0;i<3;i++){const f=mesh(new T.IcosahedronGeometry(.28,0),i%2?0xe8bd66:0xc48a9b,px-.6+i*.6,2.1,pz);f.castShadow=false;}}
+
+  // ② 道路網（第 0 步重建第二件）：自廣場向外放射的主幹道＋街廓，石板鋪面；陶土色路緣與廣場外環呼應。
+  function avenue(cx,cz,len,wid,dx,dz){
+    const rot=Math.PI/2-Math.atan2(dz,dx),m=road(cx,cz,wid,len);m.rotation.y=rot;
+    const px=-dz,pz=dx,off=wid/2-.18;
+    for(const s of [-1,1]){const curb=box(cx+px*off*s,.06,cz+pz*off*s,.36,.12,len,0xa8654f);curb.rotation.y=rot;curb.castShadow=false;}
+    return m;
+  }
+  // 東西南北主幹道：自廣場邊緣（r≈15）分別通往王宮階梯、南門、東門、西門。
+  avenue(0,-27,24,9,0,-1);
+  avenue(0,38.5,47,9,0,1);
+  avenue(31.5,0,33,8,1,0);
+  avenue(-31.5,0,33,8,-1,0);
+  // 四條斜向大道：對齊廣場 8 條放射石帶的斜向方向（東北往大教堂前）。
+  avenue(20.2,-20.2,26,6,.7071,-.7071);
+  avenue(-20.2,-20.2,26,6,-.7071,-.7071);
+  avenue(20.2,20.2,26,6,.7071,.7071);
+  avenue(-20.2,20.2,26,6,-.7071,.7071);
+  // 街廓次幹道：南北向 x=±25、東西向 z=±30；東北段避開大教堂塔樓，改由斜向大道服務。
+  road(-25,0,5,113);road(25,14.4,5,84.3);road(0,30,94,4.5);road(-12.5,-30,69,4.5);
 
   function tower(x,z,r=2.2,h=12,roofColor=0x596e80){
     cylinder(x,h/2,z,r,r+.2,h,0xd2cfb6,16);cylinder(x,h-.4,z,r+.3,r+.3,.7,0xbbbba6,16);
@@ -86,7 +107,7 @@ export function createProntera(){
   box(0,2.1,-62,100,4.2,1.6,wall);
   for(const x of [-49,49])for(const z of [-60,60])tower(x,z,2.7,8.8,0x586f76);
   for(const x of [-7,7]){tower(x,59,2.3,10.8);block(x,59,4.6,4.6);}
-  box(0,9,59,12,1.9,2.6,0xc8c7ad);roof(0,10,59,12.5,3.5,2,0x536d85);road(0,60,9,8);sign('南門',0,15,59,7);banner(-10,6.3,57);banner(10,6.3,57);
+  box(0,9,59,12,1.9,2.6,0xc8c7ad);roof(0,10,59,12.5,3.5,2,0x536d85);sign('南門',0,15,59,7);banner(-10,6.3,57);banner(10,6.3,57);
   for(const x of [-49,49])for(const z of [-6,6]){cylinder(x,3,z,1.4,1.6,6,wall,10);block(x,z,2.8,2.8);}
 
   function tree(x,z,scale=1){
@@ -107,7 +128,7 @@ export function createProntera(){
   stall(-16,5.8,0xb65d55);stall(16,5.8,0x608a8c);
   for(const x of [-20,20])for(const z of [11,37]){cylinder(x,.7,z,.65,.65,1.4,0x9d7950,10);for(const y of [.3,1.1]){const hoop=mesh(new T.TorusGeometry(.66,.04,4,12),0x555a4d,x,y,z);hoop.rotation.x=Math.PI/2;}}
   for(const x of [-10,10])for(const z of [-11,11]){box(x,.35,z,1.6,.65,1.1,0xbaa37c);for(let i=0;i<5;i++){const f=mesh(new T.IcosahedronGeometry(.32,0),i%2?0xe8bd66:0xc48a9b,x-.55+i*.28,.93,z);f.castShadow=false;}}
-  sign('道具店',-13,10,17,7);sign('武器店',13,10,17,7);sign('商店街',0,5.5,24,8);sign('旅館',-37,10,17,7);sign('城西花園',-37,6,0,8);
+  sign('商店街',0,5.5,24,8);sign('旅館',-37,10,17,7);sign('城西花園',-37,6,0,8);
   // Batch static geometry by material so the city stays responsive on small devices.
   group.updateMatrixWorld(true);const batches=new Map(),dynamic=new Set(animated.map(a=>a.mesh));
   group.traverse(o=>{if(!o.isMesh||o===ground||dynamic.has(o)||o.material.transparent)return;const key=o.material.uuid+':'+o.castShadow+':'+o.receiveShadow;if(!batches.has(key))batches.set(key,[]);batches.get(key).push(o);});

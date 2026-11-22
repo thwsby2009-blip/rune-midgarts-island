@@ -48,7 +48,10 @@ export function createProntera(){
   houses.forEach(([x,z,w,d],i)=>house(x,z,w,d,5.7+(i%3)*.65,[0xe0d2b2,0xdbc399,0xe6dcc3,0xcfc9ae][i%4],[0xa35649,0xa8654f,0x735c64][i%3]));
   // 重建噴水池：雙層水盤雕柱噴泉、陶土與米白石材層疊收邊、四角綠意花台與四向湧泉（舊噴水池已拆除）。
   block(0,0,11.6,11.6);
+  let fountainFlow=null; // 流動水（粒子＋漣漪）的每幀更新，由下方區塊建立、尾端 update() 呼叫（比照 finial 模式）。
   {
+    // 流動水：先收集各組水弧路徑，區塊尾端再據此建立粒子系統。
+    const jetPaths = [];
     const fStoneLight = new T.MeshStandardMaterial({ color: 0xe2dcc6, roughness: 0.84 });
     const fStoneMid = new T.MeshStandardMaterial({ color: 0xc9c7b2, roughness: 0.88 });
     const fStoneDark = new T.MeshStandardMaterial({ color: 0xaeaf9e, roughness: 0.92 });
@@ -60,7 +63,7 @@ export function createProntera(){
     const fLeafLight = new T.MeshStandardMaterial({ color: 0x6f9759, roughness: 0.82 });
     const fSoil = new T.MeshStandardMaterial({ color: 0x6b5340, roughness: 0.95 });
     const fWaterPool = new T.MeshStandardMaterial({ color: 0x5ab3c2, roughness: 0.14, metalness: 0.12, transparent: true, opacity: 0.80 });
-    const fWaterJet = new T.MeshStandardMaterial({ color: 0x9be2ee, roughness: 0.16, transparent: true, opacity: 0.72 });
+    const fWaterJet = new T.MeshStandardMaterial({ color: 0x9be2ee, roughness: 0.16, transparent: true, opacity: 0.28 });
     const fFoam = new T.MeshStandardMaterial({ color: 0xd9f7fc, roughness: 0.22, transparent: true, opacity: 0.62 });
 
     // 底座台階與主水池池壁
@@ -109,6 +112,7 @@ export function createProntera(){
       );
       const pierJet = mesh(new T.TubeGeometry(pierCurve, 14, 0.036, 6, false), fWaterJet, 0, 0, 0);
       pierJet.castShadow = false;
+      jetPaths.push({ curve: pierCurve, n: 46, dur: 0.85 });
     }
 
     // 四隅斜向綠意花台柱
@@ -190,6 +194,7 @@ export function createProntera(){
       );
       const topJet = mesh(new T.TubeGeometry(topCurve, 14, 0.032, 5, false), fWaterJet, 0, 0, 0);
       topJet.castShadow = false;
+      jetPaths.push({ curve: topCurve, n: 56, dur: 0.7 });
     }
 
     // 多層次水柱拋物線、溢流與水花
@@ -204,6 +209,7 @@ export function createProntera(){
       );
       const midJet = mesh(new T.TubeGeometry(midCurve, 16, 0.038, 5, false), fWaterJet, 0, 0, 0);
       midJet.castShadow = false;
+      jetPaths.push({ curve: midCurve, n: 64, dur: 0.95 });
 
       const mainCurve = new T.QuadraticBezierCurve3(
         new T.Vector3(Math.cos(a) * 1.05, 3.04, Math.sin(a) * 1.05),
@@ -212,6 +218,7 @@ export function createProntera(){
       );
       const mainJet = mesh(new T.TubeGeometry(mainCurve, 20, 0.056, 6, false), fWaterJet, 0, 0, 0);
       mainJet.castShadow = false;
+      jetPaths.push({ curve: mainCurve, n: 128, dur: 1.15 });
 
       const spillCurve = new T.QuadraticBezierCurve3(
         new T.Vector3(Math.cos(aHalf) * 2.66, 2.94, Math.sin(aHalf) * 2.66),
@@ -220,6 +227,7 @@ export function createProntera(){
       );
       const spillJet = mesh(new T.TubeGeometry(spillCurve, 14, 0.030, 5, false), fWaterJet, 0, 0, 0);
       spillJet.castShadow = false;
+      jetPaths.push({ curve: spillCurve, n: 36, dur: 1.0 });
 
       const splashRing = mesh(new T.TorusGeometry(0.24, 0.032, 6, 18), fFoam, Math.cos(a) * 3.98, 0.86, Math.sin(a) * 3.98);
       splashRing.rotation.x = Math.PI / 2;
@@ -230,13 +238,61 @@ export function createProntera(){
       drop2.castShadow = false;
     }
 
-    // 主池同心漣漪環
-    const ripple1 = mesh(new T.TorusGeometry(3.12, 0.032, 6, 48), fFoam, 0, 0.86, 0);
+    // 主池同心漣漪環（各自 clone 材質，動畫淡出時不影響 splash 的 fFoam）
+    const ripple1 = mesh(new T.TorusGeometry(3.12, 0.032, 6, 48), fFoam.clone(), 0, 0.86, 0);
     ripple1.rotation.x = Math.PI / 2;
     ripple1.castShadow = false;
-    const ripple2 = mesh(new T.TorusGeometry(4.02, 0.036, 6, 56), fFoam, 0, 0.86, 0);
+    const ripple2 = mesh(new T.TorusGeometry(4.02, 0.036, 6, 56), fFoam.clone(), 0, 0.86, 0);
     ripple2.rotation.x = Math.PI / 2;
     ripple2.castShadow = false;
+
+    // 流動水粒子：水滴沿各組水弧的貝茲路徑流動（相位錯開、速度微差、終點回起點重生），
+    // 落點與既有靜態水弧一致；靜態水管已降為淡芯（fWaterJet opacity 0.28），流動感由粒子負責。
+    {
+      const dotCanvas = document.createElement('canvas'); dotCanvas.width = dotCanvas.height = 64;
+      const dctx = dotCanvas.getContext('2d');
+      const grad = dctx.createRadialGradient(32, 32, 2, 32, 32, 30);
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.45, 'rgba(230,250,255,0.85)');
+      grad.addColorStop(1, 'rgba(200,240,255,0)');
+      dctx.fillStyle = grad; dctx.fillRect(0, 0, 64, 64);
+      const dotTexture = new T.CanvasTexture(dotCanvas); dotTexture.colorSpace = T.SRGBColorSpace;
+
+      let total = 0; for (const p of jetPaths) total += p.n;
+      const positions = new Float32Array(total * 3);
+      const seeds = [];
+      for (const p of jetPaths) for (let k = 0; k < p.n; k++) {
+        const ang = Math.random() * Math.PI * 2, rad = Math.random() * 0.055;
+        seeds.push({ curve: p.curve, dur: p.dur, phase: Math.random(), speedMul: 0.85 + Math.random() * 0.3,
+          ox: Math.cos(ang) * rad, oy: (Math.random() - 0.5) * 0.04, oz: Math.sin(ang) * rad });
+      }
+      const pGeo = new T.BufferGeometry();
+      pGeo.setAttribute('position', new T.BufferAttribute(positions, 3));
+      const pMat = new T.PointsMaterial({ size: 0.30, map: dotTexture, color: 0xcdf2fa, transparent: true, opacity: 0.9, depthWrite: false, sizeAttenuation: true });
+      const points = new T.Points(pGeo, pMat);
+      points.frustumCulled = false; points.renderOrder = 5;
+      group.add(points);
+      const tmpV = new T.Vector3();
+      fountainFlow = { update(time) {
+        const tSec = time * 0.001;
+        for (let i = 0; i < seeds.length; i++) {
+          const s = seeds[i];
+          const t = (s.phase + tSec * s.speedMul / s.dur) % 1;
+          s.curve.getPoint(t, tmpV);
+          const spread = 0.35 + t * 0.9; // 水流越接近落點越散開
+          positions[i * 3] = tmpV.x + s.ox * spread;
+          positions[i * 3 + 1] = tmpV.y + s.oy * spread;
+          positions[i * 3 + 2] = tmpV.z + s.oz * spread;
+        }
+        pGeo.attributes.position.needsUpdate = true;
+        // 漣漪：兩環錯開半個相位，緩慢放大並淡出，像水波一圈圈散開。
+        for (const [ring, ph] of [[ripple1, 0], [ripple2, 0.5]]) {
+          const p = (tSec / 3.0 + ph) % 1, sc = 1 + p * 0.28;
+          ring.scale.set(sc, sc, 1);
+          ring.material.opacity = 0.55 * (1 - p);
+        }
+      } };
+    }
   }
   const finial = mesh(new T.OctahedronGeometry(0.46), new T.MeshStandardMaterial({ color: 0xe3ca84, roughness: 0.22, metalness: 0.82, emissive: 0x3b2c0a, emissiveIntensity: 0.25 }), 0, 5.54, 0);
   animated.push({type:'finial',mesh:finial});
@@ -354,5 +410,5 @@ export function createProntera(){
     {id:'garden',name:'城西花園',desc:'樹蔭、長椅與西側街區',look:{x:-36,z:0},walk:{x:-35,z:0}},
     {id:'south-gate',name:'南門',desc:'從城門出發，探索普隆德拉',look:{x:0,z:55},walk:{x:0,z:51}}
   ];
-  return {group,ground,labels,navigation,landmarks:landmarks.map(l=>({...l,look:{x:l.look.x*S,z:l.look.z*S},walk:{x:l.walk.x*S,z:l.walk.z*S}})),spawn:{x:0,y:.15,z:47*S},update(time,camera){finial.rotation.y=time*.00025;if(camera)for(const label of labels.children){label.getWorldPosition(labelWorld);label.visible=camera.position.distanceTo(labelWorld)>23*S;}}};
+  return {group,ground,labels,navigation,landmarks:landmarks.map(l=>({...l,look:{x:l.look.x*S,z:l.look.z*S},walk:{x:l.walk.x*S,z:l.walk.z*S}})),spawn:{x:0,y:.15,z:47*S},update(time,camera){finial.rotation.y=time*.00025;if(fountainFlow)fountainFlow.update(time);if(camera)for(const label of labels.children){label.getWorldPosition(labelWorld);label.visible=camera.position.distanceTo(labelWorld)>23*S;}}};
 }

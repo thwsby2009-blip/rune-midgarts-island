@@ -43,7 +43,8 @@ export function createProntera(){
   }
   // Buildings flank the axial streets; alleys remain open between the blocks.
   // 廣場內圈四棟舊民房（±13,±17）已配合 ② 道路網的斜向大道拆除（做到哪拆哪）；原址機能建築待第 0 步④重建。
-  const houses=[[-37,17,10,9],[37,17,10,9],[-37,-17,10,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-37,-43,10,11],[-13,-42,8,9]];
+  // 原 (37,-43) 舊民房位於大教堂用地內，已配合第 0 步③拆除。
+  const houses=[[-37,17,10,9],[37,17,10,9],[-37,-17,10,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-13,-42,8,9]];
   houses.forEach(([x,z,w,d],i)=>house(x,z,w,d,5.7+(i%3)*.65,[0xe0d2b2,0xdbc399,0xe6dcc3,0xcfc9ae][i%4],[0xa35649,0xa8654f,0x735c64][i%3]));
   // 重建噴水池：加寬石砌水池、陶土色池緣、雙層水盤＋金色頂飾（舊噴水池已拆除）。
   block(0,0,11.6,11.6);
@@ -91,14 +92,33 @@ export function createProntera(){
   for(const x of [-10,-6,6,10])window(x,6,-42.7,1.3,3.4);
   for(let i=0;i<5;i++)box(0,.14+i*.15,-39.1-i*.45,7,.28,1.1,0xc3c2ae);
   banner(-5,8,-42.4);banner(5,8,-42.4);sign('普隆德拉王宮',0,22,-50,13);
-  // Cathedral in the north-east quarter: nave, pointed roof, twin bell towers.
-  block(33,-43,20,23);box(33,5.3,-43,15.5,10.6,22,0xe2dbc3);roof(33,10.6,-43,16.8,23.2,7,0x687d89);
-  tower(25,-32.5,2.25,19,0x667c8a);tower(41,-32.5,2.25,19,0x667c8a);
-  box(33,3,-31.85,3.6,5.8,.25,0x81705a);const arch=mesh(new T.TorusGeometry(1.85,.25,6,24,Math.PI),0xc6bda5,33,5.2,-31.6);arch.rotation.z=0;
-  const rose=mesh(new T.CircleGeometry(2.2,32),0x6597b3,33,8.7,-31.8);const roseRim=mesh(new T.TorusGeometry(2.25,.17,6,32),0xe5d3a0,33,8.7,-31.6);
-  for(let i=0;i<8;i++){const spoke=box(33,8.7,-31.5,.10,4.1,.06,0xe3ca85);spoke.rotation.z=i*Math.PI/4;}
-  for(const x of [24.8,41.2]){box(x,24.1,-32.5,.18,2.4,.18,0xd5b769);box(x,24.65,-32.5,1.2,.18,.18,0xd5b769);}
-  sign('大教堂',33,27,-41,10);
+  // 大教堂（第 0 步③重建，東北角）：拆舊占位教堂，新建石造大教堂——高聳中殿＋陡斜陶土屋頂、
+  // 雙鐘塔尖頂、中央尖塔（金色十字）、玫瑰窗、圓形後殿；陶土色系與廣場／路網呼應，東側臨水道。
+  block(33,-44.6,22.5,29.7);
+  // 前庭石板台地：銜接東北斜向大道末端與 x=25 次幹道北端，陶土色邊框呼應廣場外環。
+  box(33,.09,-27.5,26,.18,9,0xd8d1b8);
+  box(33,.20,-31.8,26,.06,.4,0xa8654f);box(33,.20,-23.7,26,.06,.4,0xa8654f);box(20.2,.20,-27.5,.4,.06,9,0xa8654f);box(45.8,.20,-27.5,.4,.06,9,0xa8654f);
+  box(33,.10,-31.9,6,.20,1.6,0xc3c2ae);
+  // 中殿：奶油色石牆、陡斜陶土屋頂、兩側扶壁與高窗；北端圓形後殿。
+  box(33,6.5,-44,14,13,20,0xe6dfc8);roof(33,13,-44,15.6,21,8,0x8f4f38);
+  for(const bz of [-50,-44,-38]){box(25.6,4,bz,.9,8,1.3,0xcfc39f);box(40.4,4,bz,.9,8,1.3,0xcfc39f);}
+  for(const bz of [-50,-44,-38]){box(25.94,7.5,bz,.16,5.2,1.35,0xc6bda5);box(25.80,7.5,bz,.10,4.6,.95,0x7d94a8);box(40.06,7.5,bz,.16,5.2,1.35,0xc6bda5);box(40.20,7.5,bz,.10,4.6,.95,0x7d94a8);}
+  cylinder(33,4.5,-54.5,4.8,4.8,9,0xe6dfc8,18);mesh(new T.ConeGeometry(5.2,4.5,18),0x8f4f38,33,11.25,-54.5);
+  // 中央尖塔：自屋脊升起，全城最高點。
+  cylinder(33,20,-44,1.05,1.35,5,0xd2cfb6,10);mesh(new T.ConeGeometry(1.8,5.5,10),0x8f4f38,33,25,-44);
+  box(33,28.6,-44,.16,2,.16,0xd5b769);box(33,29,-44,1,.16,.16,0xd5b769);
+  // 南立面：山牆＋玫瑰窗＋尖拱大門，雙鐘塔夾峙，塔頂金色十字。
+  box(33,7,-33.5,17,14,2.5,0xe6dfc8);roof(33,14,-33.5,17,2.5,4.5,0x8f4f38);
+  box(33,19.3,-33.5,.14,1.6,.14,0xd5b769);box(33,19.6,-33.5,.9,.14,.14,0xd5b769);
+  tower(25.5,-33,2.6,22,0x8f4f38);tower(40.5,-33,2.6,22,0x8f4f38);
+  for(const tx of [25.5,40.5]){box(tx,27,-33,.18,2.4,.18,0xd5b769);box(tx,27.5,-33,1.2,.18,.18,0xd5b769);}
+  box(33,2.9,-32.15,3.4,5.8,.25,0x81705a);mesh(new T.TorusGeometry(1.8,.25,6,24,Math.PI),0xc6bda5,33,5.8,-32.0);
+  window(29,8.5,-32.2,1.3,3.8);window(37,8.5,-32.2,1.3,3.8);
+  const rose=mesh(new T.CircleGeometry(2.3,32),0x6597b3,33,10.5,-32.12);const roseRim=mesh(new T.TorusGeometry(2.35,.17,6,32),0xe5d3a0,33,10.5,-32.02);
+  for(let i=0;i<8;i++){const spoke=box(33,10.5,-31.97,.10,4.3,.06,0xe3ca85);spoke.rotation.z=i*Math.PI/4;}
+  // 東側水道（官方圖：教堂旁臨水）：石砌邊＋水面，沿教堂東牆北流。
+  box(46.3,.05,-44,2.6,.10,23,0x6f9b9e);box(44.9,.07,-44,.35,.14,23,0x9e9c8b);box(47.7,.07,-44,.35,.14,23,0x9e9c8b);
+  sign('大教堂',33,27,-37,10);
 
   // Defensive wall and wide, passable east/west/south gateways.
   const wall=0xbbbca5;
@@ -143,7 +163,7 @@ export function createProntera(){
   const landmarks=[
     {id:'fountain',name:'中央噴水池',desc:'中央廣場與城市交會點',look:{x:0,z:0},walk:{x:0,z:9}},
     {id:'palace',name:'王宮大道',desc:'沿主幹道向北，前往王宮',look:{x:0,z:-45},walk:{x:0,z:-35}},
-    {id:'cathedral',name:'大教堂',desc:'雙鐘塔與彩色玫瑰窗',look:{x:33,z:-40},walk:{x:33,z:-28}},
+    {id:'cathedral',name:'大教堂',desc:'雙鐘塔、玫瑰窗與中央尖塔',look:{x:33,z:-40},walk:{x:33,z:-27}},
     {id:'market',name:'商店街',desc:'道具店、武器店與市集攤位',look:{x:0,z:18},walk:{x:0,z:25}},
     {id:'garden',name:'城西花園',desc:'樹蔭、長椅與西側街區',look:{x:-36,z:0},walk:{x:-35,z:0}},
     {id:'south-gate',name:'南門',desc:'從城門出發，探索普隆德拉',look:{x:0,z:55},walk:{x:0,z:51}}

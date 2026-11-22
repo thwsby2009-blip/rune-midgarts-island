@@ -46,15 +46,201 @@ export function createProntera(){
   // 原 (37,-43) 舊民房位於大教堂用地內，已配合第 0 步③拆除。
   const houses=[[-37,17,10,9],[37,17,10,9],[-37,-17,10,9],[37,-17,10,9],[-13,43,9,10],[-37,43,10,10],[13,43,9,10],[37,43,10,10],[-13,-42,8,9]];
   houses.forEach(([x,z,w,d],i)=>house(x,z,w,d,5.7+(i%3)*.65,[0xe0d2b2,0xdbc399,0xe6dcc3,0xcfc9ae][i%4],[0xa35649,0xa8654f,0x735c64][i%3]));
-  // 重建噴水池：加寬石砌水池、陶土色池緣、雙層水盤＋金色頂飾（舊噴水池已拆除）。
+  // 重建噴水池：雙層水盤雕柱噴泉、陶土與米白石材層疊收邊、四角綠意花台與四向湧泉（舊噴水池已拆除）。
   block(0,0,11.6,11.6);
-  cylinder(0,.35,0,5.6,5.8,.7,0xb2b3a3,48);cylinder(0,.72,0,5.0,5.0,.28,0x6f9b9e,48);
-  const rim=mesh(new T.TorusGeometry(5.35,.32,8,56),0xa8654f,0,.88,0);rim.rotation.x=Math.PI/2;
-  cylinder(0,1.5,0,.75,1.0,1.6,0xcdcdb6);cylinder(0,2.55,0,2.5,.9,.75,0xc5c6b2,32);cylinder(0,2.95,0,2.25,2.25,.08,0x5eabb8,32);
-  cylinder(0,3.6,0,.4,.45,1.2,0xd5d4bb);const finial=mesh(new T.OctahedronGeometry(.55),0xdac487,0,4.45,0);animated.push({type:'finial',mesh:finial});
-  const waterMaterial=new T.MeshStandardMaterial({color:0x92d8e4,transparent:true,opacity:.7,roughness:.2});
-  for(let i=0;i<8;i++){const a=i*Math.PI/4;const curve=new T.QuadraticBezierCurve3(new T.Vector3(Math.cos(a)*.8,3.0,Math.sin(a)*.8),new T.Vector3(Math.cos(a)*2.9,4.7,Math.sin(a)*2.9),new T.Vector3(Math.cos(a)*4.1,.95,Math.sin(a)*4.1));mesh(new T.TubeGeometry(curve,18,.055,5,false),waterMaterial,0,0,0);}
-  sign('中央噴水池',0,7.0,0,9);
+  {
+    const fStoneLight = new T.MeshStandardMaterial({ color: 0xe2dcc6, roughness: 0.84 });
+    const fStoneMid = new T.MeshStandardMaterial({ color: 0xc9c7b2, roughness: 0.88 });
+    const fStoneDark = new T.MeshStandardMaterial({ color: 0xaeaf9e, roughness: 0.92 });
+    const fTerracotta = new T.MeshStandardMaterial({ color: 0xa8654f, roughness: 0.82 });
+    const fTerracottaDark = new T.MeshStandardMaterial({ color: 0x8e513d, roughness: 0.86 });
+    const fPoolFloor = new T.MeshStandardMaterial({ color: 0x4b777b, roughness: 0.78 });
+    const fGold = new T.MeshStandardMaterial({ color: 0xdac487, roughness: 0.26, metalness: 0.78 });
+    const fLeafDark = new T.MeshStandardMaterial({ color: 0x557b45, roughness: 0.86 });
+    const fLeafLight = new T.MeshStandardMaterial({ color: 0x6f9759, roughness: 0.82 });
+    const fSoil = new T.MeshStandardMaterial({ color: 0x6b5340, roughness: 0.95 });
+    const fWaterPool = new T.MeshStandardMaterial({ color: 0x5ab3c2, roughness: 0.14, metalness: 0.12, transparent: true, opacity: 0.80 });
+    const fWaterJet = new T.MeshStandardMaterial({ color: 0x9be2ee, roughness: 0.16, transparent: true, opacity: 0.72 });
+    const fFoam = new T.MeshStandardMaterial({ color: 0xd9f7fc, roughness: 0.22, transparent: true, opacity: 0.62 });
+
+    // 底座台階與主水池池壁
+    cylinder(0, 0.17, 0, 5.72, 5.80, 0.16, fStoneDark, 48);
+    cylinder(0, 0.28, 0, 5.54, 5.64, 0.14, fStoneLight, 48);
+    cylinder(0, 0.59, 0, 5.26, 5.44, 0.56, fStoneMid, 48);
+    cylinder(0, 0.50, 0, 4.98, 4.98, 0.34, fPoolFloor, 48);
+
+    const poolWater = cylinder(0, 0.78, 0, 4.96, 4.96, 0.14, fWaterPool, 48);
+    poolWater.castShadow = false;
+
+    // 陶土色主池緣與米白石材雙層收邊
+    const rimOuter = mesh(new T.TorusGeometry(5.26, 0.24, 12, 64), fTerracotta, 0, 0.90, 0);
+    rimOuter.rotation.x = Math.PI / 2;
+    const rimInner = mesh(new T.TorusGeometry(5.16, 0.10, 10, 64), fStoneLight, 0, 1.07, 0);
+    rimInner.rotation.x = Math.PI / 2;
+
+    // 池壁外圈 8 道垂直壁柱裝飾
+    for (let i = 0; i < 8; i++) {
+      const a = (i + 0.5) * Math.PI / 4;
+      const pilaster = box(Math.cos(a) * 5.36, 0.59, Math.sin(a) * 5.36, 0.26, 0.54, 0.34, fStoneLight);
+      pilaster.rotation.y = -a;
+      const cap = box(Math.cos(a) * 5.38, 0.88, Math.sin(a) * 5.38, 0.32, 0.10, 0.40, fTerracottaDark);
+      cap.rotation.y = -a;
+    }
+
+    // 四向正方位湧泉柱台
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2;
+      const px = Math.cos(a) * 5.26, pz = Math.sin(a) * 5.26;
+      const pier = box(px, 0.62, pz, 0.86, 0.96, 0.86, fStoneLight);
+      pier.rotation.y = -a;
+      const pierCap = box(px, 1.15, pz, 0.94, 0.14, 0.94, fTerracotta);
+      pierCap.rotation.y = -a;
+      cylinder(px, 1.36, pz, 0.24, 0.17, 0.28, fStoneLight, 16);
+      const urnRing = mesh(new T.TorusGeometry(0.22, 0.045, 8, 20), fGold, px, 1.48, pz);
+      urnRing.rotation.x = Math.PI / 2;
+      mesh(new T.SphereGeometry(0.16, 12, 10), fGold, px, 1.56, pz);
+
+      const spout = box(Math.cos(a) * 4.84, 1.03, Math.sin(a) * 4.84, 0.26, 0.10, 0.14, fGold);
+      spout.rotation.y = -a;
+      const pierCurve = new T.QuadraticBezierCurve3(
+        new T.Vector3(Math.cos(a) * 4.72, 1.04, Math.sin(a) * 4.72),
+        new T.Vector3(Math.cos(a) * 4.22, 1.32, Math.sin(a) * 4.22),
+        new T.Vector3(Math.cos(a) * 3.68, 0.85, Math.sin(a) * 3.68)
+      );
+      const pierJet = mesh(new T.TubeGeometry(pierCurve, 14, 0.036, 6, false), fWaterJet, 0, 0, 0);
+      pierJet.castShadow = false;
+    }
+
+    // 四隅斜向綠意花台柱
+    const flowerColors = [0xe28d6e, 0xf2e3b6];
+    for (let i = 0; i < 4; i++) {
+      const a = Math.PI / 4 + i * Math.PI / 2;
+      const px = Math.cos(a) * 5.24, pz = Math.sin(a) * 5.24;
+      const planter = cylinder(px, 0.60, pz, 0.56, 0.64, 0.92, fStoneMid, 8);
+      planter.rotation.y = -a + Math.PI / 8;
+      const planterRim = cylinder(px, 1.11, pz, 0.62, 0.54, 0.14, fTerracotta, 8);
+      planterRim.rotation.y = -a + Math.PI / 8;
+      cylinder(px, 1.15, pz, 0.48, 0.48, 0.08, fSoil, 12);
+      mesh(new T.SphereGeometry(0.36, 12, 10), fLeafDark, px, 1.34, pz);
+      for (let j = 0; j < 3; j++) {
+        const ba = a + j * (Math.PI * 2 / 3);
+        const bx = px + Math.cos(ba) * 0.22, bz = pz + Math.sin(ba) * 0.22;
+        mesh(new T.SphereGeometry(0.22, 10, 8), fLeafLight, bx, 1.28, bz);
+        mesh(new T.SphereGeometry(0.065, 8, 6), flowerColors[(i + j) % 2], bx + Math.cos(ba) * 0.12, 1.40, bz + Math.sin(ba) * 0.12);
+      }
+    }
+
+    // 中央主柱與八角圍柱
+    const plinth = cylinder(0, 0.96, 0, 1.48, 1.68, 0.42, fStoneDark, 8);
+    plinth.rotation.y = Math.PI / 8;
+    const plinthTrim = mesh(new T.TorusGeometry(1.48, 0.09, 8, 32), fTerracotta, 0, 1.15, 0);
+    plinthTrim.rotation.x = Math.PI / 2;
+
+    cylinder(0, 1.78, 0, 0.74, 0.96, 1.30, fStoneLight, 24);
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      const cx = Math.cos(a) * 0.94, cz = Math.sin(a) * 0.94;
+      cylinder(cx, 1.76, cz, 0.10, 0.12, 1.14, fStoneMid, 12);
+      cylinder(cx, 1.22, cz, 0.15, 0.17, 0.10, fStoneDark, 12);
+      cylinder(cx, 2.30, cz, 0.16, 0.13, 0.10, fTerracottaDark, 12);
+    }
+
+    // 下層大水盤與放射狀托架
+    cylinder(0, 2.48, 0, 1.75, 0.92, 0.36, fStoneMid, 32);
+    cylinder(0, 2.78, 0, 2.68, 1.72, 0.34, fStoneLight, 32);
+    for (let i = 0; i < 12; i++) {
+      const a = i * Math.PI / 6;
+      const br = box(Math.cos(a) * 1.56, 2.58, Math.sin(a) * 1.56, 0.75, 0.16, 0.16, fStoneDark);
+      br.rotation.order = 'YXZ';
+      br.rotation.y = -a;
+      br.rotation.z = -0.42;
+    }
+    const lowerRim = mesh(new T.TorusGeometry(2.68, 0.14, 10, 48), fTerracotta, 0, 2.95, 0);
+    lowerRim.rotation.x = Math.PI / 2;
+    const lowerLip = mesh(new T.TorusGeometry(2.54, 0.07, 8, 48), fStoneLight, 0, 3.02, 0);
+    lowerLip.rotation.x = Math.PI / 2;
+    const lowerWater = cylinder(0, 2.96, 0, 2.50, 2.50, 0.08, fWaterPool, 40);
+    lowerWater.castShadow = false;
+
+    // 上層石柱與上水盤
+    cylinder(0, 3.12, 0, 0.70, 0.84, 0.28, fStoneDark, 16);
+    const midCollar = mesh(new T.TorusGeometry(0.68, 0.06, 8, 32), fGold, 0, 3.24, 0);
+    midCollar.rotation.x = Math.PI / 2;
+    cylinder(0, 3.60, 0, 0.46, 0.58, 0.72, fStoneLight, 20);
+    cylinder(0, 4.08, 0, 1.46, 0.54, 0.38, fStoneLight, 32);
+    const upperRim = mesh(new T.TorusGeometry(1.46, 0.10, 10, 40), fTerracotta, 0, 4.27, 0);
+    upperRim.rotation.x = Math.PI / 2;
+    const upperWater = cylinder(0, 4.26, 0, 1.38, 1.38, 0.07, fWaterPool, 32);
+    upperWater.castShadow = false;
+
+    // 頂部塔座與金色飾環
+    cylinder(0, 4.52, 0, 0.26, 0.40, 0.52, fStoneMid, 16);
+    cylinder(0, 4.84, 0, 0.42, 0.22, 0.16, fGold, 16);
+    cylinder(0, 5.02, 0, 0.06, 0.20, 0.24, fStoneLight, 12);
+    const haloRing = mesh(new T.TorusGeometry(0.48, 0.045, 8, 36), fGold, 0, 5.14, 0);
+    haloRing.rotation.x = Math.PI / 2;
+
+    // 頂部四向小噴泉
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2 + Math.PI / 4;
+      const topCurve = new T.QuadraticBezierCurve3(
+        new T.Vector3(Math.cos(a) * 0.16, 4.90, Math.sin(a) * 0.16),
+        new T.Vector3(Math.cos(a) * 0.62, 5.25, Math.sin(a) * 0.62),
+        new T.Vector3(Math.cos(a) * 0.98, 4.28, Math.sin(a) * 0.98)
+      );
+      const topJet = mesh(new T.TubeGeometry(topCurve, 14, 0.032, 5, false), fWaterJet, 0, 0, 0);
+      topJet.castShadow = false;
+    }
+
+    // 多層次水柱拋物線、溢流與水花
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      const aHalf = a + Math.PI / 8;
+
+      const midCurve = new T.QuadraticBezierCurve3(
+        new T.Vector3(Math.cos(aHalf) * 1.24, 4.30, Math.sin(aHalf) * 1.24),
+        new T.Vector3(Math.cos(aHalf) * 1.72, 4.54, Math.sin(aHalf) * 1.72),
+        new T.Vector3(Math.cos(aHalf) * 2.04, 2.98, Math.sin(aHalf) * 2.04)
+      );
+      const midJet = mesh(new T.TubeGeometry(midCurve, 16, 0.038, 5, false), fWaterJet, 0, 0, 0);
+      midJet.castShadow = false;
+
+      const mainCurve = new T.QuadraticBezierCurve3(
+        new T.Vector3(Math.cos(a) * 1.05, 3.04, Math.sin(a) * 1.05),
+        new T.Vector3(Math.cos(a) * 2.75, 4.72, Math.sin(a) * 2.75),
+        new T.Vector3(Math.cos(a) * 3.98, 0.85, Math.sin(a) * 3.98)
+      );
+      const mainJet = mesh(new T.TubeGeometry(mainCurve, 20, 0.056, 6, false), fWaterJet, 0, 0, 0);
+      mainJet.castShadow = false;
+
+      const spillCurve = new T.QuadraticBezierCurve3(
+        new T.Vector3(Math.cos(aHalf) * 2.66, 2.94, Math.sin(aHalf) * 2.66),
+        new T.Vector3(Math.cos(aHalf) * 3.00, 2.55, Math.sin(aHalf) * 3.00),
+        new T.Vector3(Math.cos(aHalf) * 3.12, 0.85, Math.sin(aHalf) * 3.12)
+      );
+      const spillJet = mesh(new T.TubeGeometry(spillCurve, 14, 0.030, 5, false), fWaterJet, 0, 0, 0);
+      spillJet.castShadow = false;
+
+      const splashRing = mesh(new T.TorusGeometry(0.24, 0.032, 6, 18), fFoam, Math.cos(a) * 3.98, 0.86, Math.sin(a) * 3.98);
+      splashRing.rotation.x = Math.PI / 2;
+      splashRing.castShadow = false;
+      const drop1 = mesh(new T.SphereGeometry(0.055, 6, 6), fFoam, Math.cos(a + 0.04) * 3.92, 0.96, Math.sin(a + 0.04) * 3.92);
+      drop1.castShadow = false;
+      const drop2 = mesh(new T.SphereGeometry(0.042, 6, 6), fFoam, Math.cos(a - 0.04) * 4.06, 0.93, Math.sin(a - 0.04) * 4.06);
+      drop2.castShadow = false;
+    }
+
+    // 主池同心漣漪環
+    const ripple1 = mesh(new T.TorusGeometry(3.12, 0.032, 6, 48), fFoam, 0, 0.86, 0);
+    ripple1.rotation.x = Math.PI / 2;
+    ripple1.castShadow = false;
+    const ripple2 = mesh(new T.TorusGeometry(4.02, 0.036, 6, 56), fFoam, 0, 0.86, 0);
+    ripple2.rotation.x = Math.PI / 2;
+    ripple2.castShadow = false;
+  }
+  const finial = mesh(new T.OctahedronGeometry(0.46), new T.MeshStandardMaterial({ color: 0xe3ca84, roughness: 0.22, metalness: 0.82, emissive: 0x3b2c0a, emissiveIntensity: 0.25 }), 0, 5.54, 0);
+  animated.push({type:'finial',mesh:finial});
+  sign('中央噴水池',0,7.6,0,9);
   // 廣場四角石砌花壇（多層次綠意點綴）。
   for(const [px,pz] of [[-11,-11],[11,-11],[-11,11],[11,11]]){box(px,.35,pz,2.2,.7,2.2,0xbaa37c);const shrub=mesh(new T.IcosahedronGeometry(.95,1),0x688b55,px,1.35,pz);shrub.scale.y=1.2;for(let i=0;i<3;i++){const f=mesh(new T.IcosahedronGeometry(.28,0),i%2?0xe8bd66:0xc48a9b,px-.6+i*.6,2.1,pz);f.castShadow=false;}}
 

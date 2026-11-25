@@ -437,7 +437,30 @@ export function createProntera(){
   for(const px of [-8.6,-7.0])cylinder(px,1.0,20.3,.07,.07,2.0,0x806243,6);
   box(-7.8,1.9,20.3,1.8,.12,.12,0x806243);
   for(let i=0;i<3;i++){const sw=box(-8.5+i*.7,1.15,20.3,.13,1.6,.05,0xb9c4cc);sw.rotation.z=.25;}
+  // 門西側補一組小型直立劍架（與東側武器架呼應；西側鐵砧保留不動，劍架不擋門、不碰鐵砧與遮陽篷支柱）。
+  box(-13.55,.18,20.3,1.7,.36,.55,0x8a7358);
+  for(const px of [-14.25,-12.85])cylinder(px,.85,20.3,.06,.06,1.7,0x806243,6);
+  box(-13.55,1.62,20.3,1.55,.11,.11,0x806243);
+  for(const sx of [-13.95,-13.55,-13.15]){
+    box(sx,1.0,20.3,.13,1.25,.05,0xb9c4cc);
+    box(sx,1.68,20.3,.34,.07,.1,0xd5b769);
+    cylinder(sx,1.82,20.3,.04,.04,.2,0x685344,8);
+    mesh(new T.SphereGeometry(.065,8,6),0xd5b769,sx,1.97,20.3);
+  }
   sign('武器店',-11.5,9.9,21,7);
+  // 門面大劍招牌（依卡普參考圖改做，取代先前的懸掛看板）：藍色盾形背板貼在店面北牆上，
+  // 一把大劍水平橫掛於門上方、橫跨門面（總長約 6.0），劍尖朝西、金色十字護手、紅色握柄、金色劍首。
+  // 盾形背板：金邊圓盤＋下方尖角，中心 (-11.5, 5.6)，位於遮陽篷上方、山牆圓盾下方。
+  const wPlateRim=mesh(new T.CylinderGeometry(1.08,1.08,.08,24),0xd5b769,-11.5,5.6,20.78);wPlateRim.rotation.x=Math.PI/2;
+  const wPlate=mesh(new T.CylinderGeometry(.97,.97,.1,24),0x4a6fa5,-11.5,5.6,20.75);wPlate.rotation.x=Math.PI/2;
+  const wTipRim=box(-11.5,4.8,20.78,.58,.58,.08,0xd5b769);wTipRim.rotation.z=Math.PI/4;
+  const wTip=box(-11.5,4.8,20.74,.48,.48,.09,0x4a6fa5);wTip.rotation.z=Math.PI/4;
+  // 大劍本體：中心 y 5.45、z 20.62，略凸出背板正面。
+  box(-12.58,5.45,20.62,4.55,.34,.09,0xb9c4cc); // 劍身
+  const wBladeTip=box(-14.78,5.45,20.62,.42,.42,.09,0xb9c4cc);wBladeTip.rotation.z=Math.PI/4; // 菱形劍尖（朝西）
+  box(-10.18,5.45,20.62,.16,1.05,.2,0xd5b769); // 金色十字護手
+  const wGrip=cylinder(-9.78,5.45,20.62,.1,.1,.62,0xa03a30,10);wGrip.rotation.z=Math.PI/2; // 紅色握柄
+  mesh(new T.SphereGeometry(.17,10,8),0xd5b769,-9.28,5.45,20.62); // 金色劍首球
 
   // Defensive wall and wide, passable east/west/south gateways.
   const wall=0xbbbca5;

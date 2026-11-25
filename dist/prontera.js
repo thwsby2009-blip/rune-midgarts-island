@@ -399,6 +399,46 @@ export function createProntera(){
   for(const y of [.3,1.1]){const hoop=mesh(new T.TorusGeometry(.61,.04,4,12),0x555a4d,7.6,y,20.6);hoop.rotation.x=Math.PI/2;}
   sign('道具店',11.5,9.9,21,7);
 
+  // 武器店（第 0 步④：廣場周邊機能建築第二棟）：廣場西南側、與道具店對稱，面向廣場開店；
+  // 深色木構＋陶土屋頂，山牆圓盾徽、櫥窗陳列刀劍，門前鐵砧與武器架。
+  block(-11.5,24,8.5,7.5);
+  box(-11.5,.35,24,8.6,.7,6.6,0x9e9c8b);
+  box(-11.5,3.45,24,8,6,6,0xe0d6b8);
+  for(const bx of [-14.9,-8.1])box(bx,3.45,20.93,.19,6,.15,0x65533d);
+  box(-11.5,5.9,20.93,8,.2,.16,0x6e5840);box(-11.5,.85,20.93,8,.18,.16,0x6e5840);
+  roof(-11.5,6.45,24,9,7,2.6,0xa8654f);
+  box(-11.5,6.35,20.4,9.2,.18,.3,0x6e5840);
+  box(-14.3,8.1,25.5,.9,2.2,1.0,0xb6aa92);box(-14.3,9.25,25.5,1.1,.18,1.2,0x9e9c8b);
+  // 山牆圓盾徽（貼於屋頂三角山牆北面）。
+  const wShield=mesh(new T.CylinderGeometry(.8,.8,.12,20),0x7a8894,-11.5,7.6,20.44);wShield.rotation.x=Math.PI/2;
+  mesh(new T.SphereGeometry(.16,10,8),0xd5b769,-11.5,7.6,20.36);
+  // 店面：正門＋兩側武器櫥窗（朝北面向廣場），櫥窗內交叉刀劍。
+  box(-11.5,1.8,20.94,2.0,2.9,.12,0x8a7358);
+  box(-11.5,1.75,20.90,1.6,2.6,.14,0x685344);
+  mesh(new T.SphereGeometry(.07,8,6),0xdbb05e,-11.9,1.7,20.8);
+  box(-11.5,3.35,20.9,2.2,.22,.18,0x6e5840);
+  for(const wx of [-13.7,-9.3]){
+    box(wx,2.6,20.94,1.7,1.9,.12,0xf2dfb3);
+    box(wx,2.6,20.88,1.5,1.7,.08,0x779a9a);
+    for(const s of [-1,1]){const sw=box(wx+s*.28,2.6,20.80,.12,1.4,.05,0xb9c4cc);sw.rotation.z=s*.55;}
+    box(wx,1.55,20.85,1.9,.16,.3,0x8a7358);
+  }
+  // 條紋遮陽篷＋支柱（深藍灰條紋，區分道具店的紅白篷）。
+  for(let i=0;i<13;i++){const awn=box(-11.5-3.6+i*.6,4.35,20.15,.61,.12,1.9,i%2?0xf0e4c8:0x5a6b7a);awn.rotation.x=.16;}
+  cylinder(-14.8,2.15,19.35,.06,.06,4.3,0x806243,6);
+  cylinder(-8.2,2.15,19.35,.06,.06,4.3,0x806243,6);
+  // 側窗。
+  box(-15.56,3.5,24,.14,1.8,1.5,0xf2dfb3);box(-15.62,3.5,24,.08,1.5,1.2,0x779a9a);
+  box(-7.44,3.5,24,.14,1.8,1.5,0xf2dfb3);box(-7.38,3.5,24,.08,1.5,1.2,0x779a9a);
+  // 門前鐵砧與武器架。
+  box(-15.2,.35,20.4,1.0,.7,1.0,0x8a7358);
+  box(-15.2,.95,20.4,1.3,.35,.55,0x6b7280);
+  box(-15.2,1.25,20.4,.5,.25,.5,0x6b7280);
+  for(const px of [-8.6,-7.0])cylinder(px,1.0,20.3,.07,.07,2.0,0x806243,6);
+  box(-7.8,1.9,20.3,1.8,.12,.12,0x806243);
+  for(let i=0;i<3;i++){const sw=box(-8.5+i*.7,1.15,20.3,.13,1.6,.05,0xb9c4cc);sw.rotation.z=.25;}
+  sign('武器店',-11.5,9.9,21,7);
+
   // Defensive wall and wide, passable east/west/south gateways.
   const wall=0xbbbca5;
   for(const x of [-49,49])for(const z of [-33,33]){box(x,2.2,z,1.7,4.4,54,wall);block(x,z,1.7,54);for(let q=-25;q<26;q+=3.5)box(x,4.6,z+q,2.0,.9,1.2,wall);}
@@ -445,6 +485,7 @@ export function createProntera(){
     {id:'cathedral',name:'大教堂',desc:'雙鐘塔、玫瑰窗與中央尖塔',look:{x:33,z:-40},walk:{x:33,z:-27}},
     {id:'market',name:'商店街',desc:'道具店、武器店與市集攤位',look:{x:0,z:18},walk:{x:0,z:25}},
     {id:'item-shop',name:'道具店',desc:'藥水、道具與冒險補給',look:{x:11.5,z:24},walk:{x:11.5,z:18.5}},
+    {id:'weapon-shop',name:'武器店',desc:'劍、盾與防具',look:{x:-11.5,z:24},walk:{x:-11.5,z:18.5}},
     {id:'garden',name:'城西花園',desc:'樹蔭、長椅與西側街區',look:{x:-36,z:0},walk:{x:-35,z:0}},
     {id:'south-gate',name:'南門',desc:'從城門出發，探索普隆德拉',look:{x:0,z:55},walk:{x:0,z:51}}
   ];

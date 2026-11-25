@@ -455,6 +455,16 @@ export function createProntera(){
   const wPlate=mesh(new T.CylinderGeometry(.97,.97,.1,24),0x4a6fa5,-11.5,5.6,20.75);wPlate.rotation.x=Math.PI/2;
   const wTipRim=box(-11.5,4.8,20.78,.58,.58,.08,0xd5b769);wTipRim.rotation.z=Math.PI/4;
   const wTip=box(-11.5,4.8,20.74,.48,.48,.09,0x4a6fa5);wTip.rotation.z=Math.PI/4;
+  // 圓盤上的交叉雙劍圖案：兩把劍以 X 形（±43°）交叉貼在藍面正前方（z 20.685，介於藍面 20.70 與大劍 20.62 之間），
+  // 大劍橫過其中心——盾上有交叉劍、大劍壓在最前。劍尖／劍首略出藍面邊緣、落在金邊上，仿徽章做法。
+  for(const s of [-1,1]){
+    const cs=new T.Group();cs.position.set(-11.5,5.6,20.685);cs.rotation.z=s*.75;group.add(cs);
+    box(0,.10,0,.13,1.39,.03,0xb9c4cc,cs); // 鋼色劍身
+    const csTip=box(0,.86,0,.15,.15,.03,0xb9c4cc,cs);csTip.rotation.z=Math.PI/4; // 菱形劍尖
+    box(0,-.62,0,.48,.09,.03,0xd5b769,cs); // 金色十字護手
+    cylinder(0,-.80,0,.045,.045,.28,0xa03a30,8,cs); // 紅色握柄（同大劍）
+    mesh(new T.SphereGeometry(.065,8,6),0xd5b769,0,-.985,0,cs); // 金色劍首球
+  }
   // 大劍本體：中心 y 5.45、z 20.62，略凸出背板正面。
   box(-12.58,5.45,20.62,4.55,.34,.09,0xb9c4cc); // 劍身
   const wBladeTip=box(-14.78,5.45,20.62,.42,.42,.09,0xb9c4cc);wBladeTip.rotation.z=Math.PI/4; // 菱形劍尖（朝西）
